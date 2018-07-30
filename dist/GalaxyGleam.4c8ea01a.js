@@ -103,9 +103,37 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({"index.js":[function(require,module,exports) {
+})({"game/assets/white.png":[function(require,module,exports) {
+module.exports = "/white.6fd02e9c.png";
+},{}],"index.js":[function(require,module,exports) {
+// import {preload} from './game/preload';
+// import {create} from './game/create';
 
-},{}],"../../../.nvm/versions/node/v10.1.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+var background = require('./game/assets/white.png');
+
+var config = {
+    type: Phaser.AUTO,
+    width: 1280,
+    height: 720,
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var game = new Phaser.Game(config);
+
+function preload() {
+    this.load.image('background', background);
+}
+
+function create() {
+    this.add.image(640, 360, 'background');
+}
+
+function update() {}
+},{"./game/assets/white.png":"game/assets/white.png"}],"../../../.nvm/versions/node/v10.1.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -276,3 +304,4 @@ function hmrAccept(bundle, id) {
   });
 }
 },{}]},{},["../../../.nvm/versions/node/v10.1.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
+//# sourceMappingURL=/GalaxyGleam.4c8ea01a.map
