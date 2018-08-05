@@ -19,8 +19,9 @@ const config: GameConfig = {
         default: "arcade",
         arcade: {
             fps: 60,
-            gravity: { y: 0 }
-        }
+            gravity: { y: 0 },
+            //debug: true
+        },
     },
     scene: [ Menu, FullGame ]
 };

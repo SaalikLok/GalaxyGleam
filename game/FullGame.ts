@@ -85,11 +85,13 @@ export class FullGame extends Phaser.Scene{
         player = this.physics.add.image(50, 360, 'meteor');
         cursors = this.input.keyboard.createCursorKeys();
 
+        player.setCircle(30, 0, 2);
         player.setDamping(true);
         player.setDrag(0.99);
         player.setMaxVelocity(200);
         player.body.collideWorldBounds = true;
         player.body.bounce.set(1);
+        
     }
 
     update(): void{
@@ -130,6 +132,8 @@ export class FullGame extends Phaser.Scene{
     
         asteroids.children.iterate(function(child){
             child.body.velocity.setTo(Phaser.Math.Between(-175, -100), 0);
+            child.body.setAngularVelocity(Phaser.Math.Between(0, 150));
+            child.body.setCircle(35, 10, 12);
         })
     
         this.physics.add.collider(player, asteroids, this.hitEnemy, null, this);
@@ -144,9 +148,11 @@ export class FullGame extends Phaser.Scene{
     
         bigastr.children.iterate(function(child){
             child.body.velocity.setTo(Phaser.Math.Between(-100, -50), 0);
+            child.body.setAngularVelocity(Phaser.Math.Between(0, 20));
+            child.body.setCircle(95, 10, 25)
         })
     
-        this.physics.add.collider(player, asteroids, this.hitEnemy, null, this);
+        this.physics.add.collider(player, bigastr, this.hitEnemy, null, this);
     
     }
     
