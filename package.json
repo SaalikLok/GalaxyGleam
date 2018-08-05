@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "declarations": "^0.1.16",
     "phaser": "^3.11.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import background from "./assets/menu.png";
+import background1 from "./assets/background1.png";
 import bigAstroid from './assets/bigastr.png';
 import medAstr from './assets/smallastr.png';
 import meteor from './assets/meteor.png';
@@ -14,6 +14,9 @@ import sector1Music from './audio/sector1.mp3';
 
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./declarations.d.ts"/>
+
+import "phaser";
+import { createFalse } from "../node_modules/typescript";
 
 //Instance variables
 let level = 1;
@@ -33,7 +36,7 @@ var delayLv2 = Phaser.Math.Between(1000, 2000);
 var delayLv3 = Phaser.Math.Between(750, 1500);
 
 export class FullGame extends Phaser.Scene{
-    private background: Phaser.GameObjects.Image;
+    private background: Phaser.GameObjects.TileSprite;
     private bigAstr: Phaser.GameObjects.Image;
     private medAstr: Phaser.GameObjects.Image;
     private meteor: Phaser.GameObjects.Image;
@@ -47,7 +50,7 @@ export class FullGame extends Phaser.Scene{
     }
 
     preload(): void {
-        this.load.image('background', background);
+        this.load.image('background1', background1);
         this.load.image('meteor', meteor);
         this.load.image('bigastr', bigAstroid);
         this.load.image('medastr', medAstr);
@@ -57,18 +60,17 @@ export class FullGame extends Phaser.Scene{
 
     create(): void {
         //set Clock
-        clock = new Phaser.Time.Clock(this);
-        clockstart = clock.now;
+        /*clock = new Phaser.Time.Clock(this);
+        clockstart = clock.now;*/
         //Background Creation 
-        this.add.image(640, 360, 'background');
+        this.background = this.add.tileSprite(640, 360, 1280, 720, 'background1');
 
         if (level == 1){
-        this.transitionSector = this.sound.add('transitionSector');
-        //this.transitionSector.play();
-        this.sector1 = this.sound.add('sector1', {loop: true});
-        this.sector1.play();
+            this.transitionSector = this.sound.add('transitionSector');
+            //this.transitionSector.play();
+            this.sector1 = this.sound.add('sector1', {loop: true});
+            this.sector1.play();
 
-            
             const sendingEnemies = this.time.addEvent({ delay: delayLv1, callback: this.sendAsteroid, callbackScope: this, loop: true});
             const sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendbigAstr, callbackScope: this, loop: true});
         }
@@ -91,6 +93,8 @@ export class FullGame extends Phaser.Scene{
     }
 
     update(): void{
+        this.background.tilePositionX = this.background.tilePositionX + 5;
+
         if (cursors.up.isDown){
             this.physics.velocityFromRotation(player.rotation, 200, player.body.acceleration);
         }
@@ -152,6 +156,6 @@ export class FullGame extends Phaser.Scene{
     
         player.setTint(0xff0000);
     
-        this.game.destroy(true);
+        //this.game.destroy(true);
     }
 }

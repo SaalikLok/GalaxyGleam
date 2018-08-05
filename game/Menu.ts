@@ -10,6 +10,8 @@ import menuMusic from "./audio/mainMenu.mp3";
 /// <reference path="./phaser.d.ts"/>
 /// <reference path="./declarations.d.ts"/>
 
+import "phaser";
+
 export class Menu extends Phaser.Scene{
     private background: Phaser.GameObjects.Image;
     private gameMusic: Phaser.Sound.WebAudioSoundManager;
