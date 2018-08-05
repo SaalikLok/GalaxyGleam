@@ -103,73 +103,335 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({"game/assets/menu.png":[function(require,module,exports) {
-module.exports = "/menu.1c137d9c.png";
-},{}],"game/assets/blue.png":[function(require,module,exports) {
-module.exports = "/blue.a864c7f9.png";
+})({"game/Menu.js":[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var background = './game/assets/menu.png';
+var menuMusic = './game/audio/mainMenu.mp3';
+
+var Menu = exports.Menu = function (_Phaser$Scene) {
+    _inherits(Menu, _Phaser$Scene);
+
+    function Menu() {
+        _classCallCheck(this, Menu);
+
+        var _this = _possibleConstructorReturn(this, (Menu.__proto__ || Object.getPrototypeOf(Menu)).call(this));
+
+        Phaser.Scene.call(_this, 'menu');
+        return _this;
+    }
+
+    _createClass(Menu, [{
+        key: 'preload',
+        value: function preload() {
+            this.load.image('background', background);
+            this.load.audio('menuMusic', menuMusic);
+        }
+    }, {
+        key: 'create',
+        value: function create() {
+            this.add.image(640, 360, 'background');
+
+            var music = this.sound.add('menuMusic');
+            music.setLoop(true);
+            music.play();
+
+            var button = this.add.text(100, 100, "Play");
+            button.setInteractive();
+            button.on('pointerdown', function () {
+                music.stop();
+                this.scene.start('game');
+            }, this);
+        }
+    }, {
+        key: 'goToGame',
+        value: function goToGame() {
+            this.scene.start('game');
+        }
+    }]);
+
+    return Menu;
+}(Phaser.Scene);
+},{}],"game/FullGame.js":[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var background = './game/assets/menu.png';
+var blue = './game/assets/blue.png';
+var bigAstroid = './game/assets/bigastr.png';
+var meteor = './game/assets/meteor.png';
+
+//Sounds
+var transitionSector = './game/audio/tsector1.mp3';
+var sector1Music = './game/audio/sector1.mp3';
+
+//Instance variables
+var level = 1;
+var cursors = void 0;
+var player = void 0;
+
+//Enemy instance variables
+var asteroids = void 0;
+var bigastr = void 0;
+
+//Delay Timings
+var delayLv0 = Phaser.Math.Between(15000, 20000);
+var delayLv1 = Phaser.Math.Between(2500, 4000);
+var delayLv2 = Phaser.Math.Between(1000, 2000);
+var delayLv3 = Phaser.Math.Between(750, 1500);
+
+var FullGame = exports.FullGame = function (_Phaser$Scene) {
+    _inherits(FullGame, _Phaser$Scene);
+
+    function FullGame() {
+        _classCallCheck(this, FullGame);
+
+        var _this = _possibleConstructorReturn(this, (FullGame.__proto__ || Object.getPrototypeOf(FullGame)).call(this));
+
+        Phaser.Scene.call(_this, 'game');
+        return _this;
+    }
+
+    _createClass(FullGame, [{
+        key: 'preload',
+        value: function preload() {
+            this.load.image('background', background);
+            this.load.image('blue', blue);
+            this.load.image('meteor', meteor);
+            this.load.image('bigastr', bigAstroid);
+            this.load.audio('sector1', sector1Music);
+            this.load.audio('transitionSector', transitionSector);
+        }
+    }, {
+        key: 'create',
+        value: function create() {
+            //Background Creation
+            this.add.image(640, 360, 'background');
+
+            //Level Init - enemies and music
+            var music;
+            if (level == 1) {
+                var transitionMusic = this.sound.add('transitionSector');
+                transitionMusic.play();
+
+                /*music = this.sound.add('sector1');
+                music.setLoop(true);
+                music.play();*/
+
+                sendingEnemies = this.time.addEvent({ delay: delayLv1, callback: sendAsteroid, callbackScope: this, loop: true });
+                sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: sendbigAstr, callbackScope: this, loop: true });
+            } else if (level == 2) {} else {}
+
+            //Create Player and Controls
+            player = this.physics.add.image(50, 360, 'meteor');
+            cursors = this.input.keyboard.createCursorKeys();
+
+            player.setDamping(true);
+            player.setDrag(0.99);
+            player.setMaxVelocity(200);
+            player.body.collideWorldBounds = true;
+            player.body.bounce.set(1);
+        }
+    }, {
+        key: 'update',
+        value: function update() {
+            if (cursors.up.isDown) {
+                this.physics.velocityFromRotation(player.rotation, 200, player.body.acceleration);
+            } else {
+                player.setAcceleration(0);
+            }
+
+            if (cursors.left.isDown) {
+                player.setAngularVelocity(-300);
+            } else if (cursors.right.isDown) {
+                player.setAngularVelocity(300);
+            } else {
+                player.setAngularVelocity(0);
+            }
+        }
+    }, {
+        key: 'sendAsteroid',
+        value: function sendAsteroid() {
+            asteroids = this.physics.add.group({
+                key: 'blue',
+                repeat: Phaser.Math.Between(0, 1),
+                setXY: { x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250) }
+            });
+
+            asteroids.children.iterate(function (child) {
+                child.body.velocity.setTo(Phaser.Math.Between(-175, -100), 0);
+            });
+
+            this.physics.add.collider(player, asteroids, hitEnemy, null, this);
+        }
+    }, {
+        key: 'sendbigAstr',
+        value: function sendbigAstr() {
+            bigastr = this.physics.add.group({
+                key: 'bigAstr',
+                repeat: 0,
+                setXY: { x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250) }
+            });
+
+            bigastr.children.iterate(function (child) {
+                child.body.velocity.setTo(Phaser.Math.Between(-100, -50), 0);
+            });
+
+            this.physics.add.collider(player, asteroids, hitEnemy, null, this);
+        }
+    }, {
+        key: 'hitEnemy',
+        value: function hitEnemy() {
+            console.log("enemy hit");
+            this.physics.pause();
+
+            player.setTint(0xff0000);
+
+            gameOver = true;
+        }
+    }]);
+
+    return FullGame;
+}(Phaser.Scene);
 },{}],"index.js":[function(require,module,exports) {
+'use strict';
+
+var _Menu = require('./game/Menu');
+
+var _Menu2 = _interopRequireDefault(_Menu);
+
+var _FullGame = require('./game/FullGame');
+
+var _FullGame2 = _interopRequireDefault(_FullGame);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
 //Assets
 var background = require('./game/assets/menu.png');
 var blue = require('./game/assets/blue.png');
+var bigAstroid = require('./game/assets/bigastr.png');
+var meteor = require('./game/assets/meteor.png');
+
+//Sounds
+var menuMusic = require('./game/audio/mainMenu.mp3');
+var transitionSector = require('./game/audio/tsector1.mp3');
+var sector1Music = require('./game/audio/sector1.mp3');
 
 //Instance variables
 var level = 1;
 var cursors;
 var player;
+
+//Enemy instance variables
 var asteroids;
-var sendEnemies;
-var delayLv1 = Phaser.Math.Between(1900, 2500);
+var bigastr;
+
+//Delay Timings
+var delayLv0 = Phaser.Math.Between(15000, 20000);
+var delayLv1 = Phaser.Math.Between(2500, 4000);
 var delayLv2 = Phaser.Math.Between(1000, 2000);
 var delayLv3 = Phaser.Math.Between(750, 1500);
-
-var Menu = new Phaser.Class({
+*/
+/*var Menu = new Phaser.Class({
     Extends: Phaser.Scene,
-
-    initialize: function Menu() {
+    
+    initialize:
+    function Menu(){
         Phaser.Scene.call(this, 'menu');
     },
 
-    preload: function preload() {
+    preload: function(){
         this.load.image('background', background);
+        this.load.audio('menuMusic', menuMusic);
     },
 
-    goToGame: function goToGame() {
+    goToGame: function(){
         this.scene.start('game');
     },
 
-    create: function create() {
+    create: function(){
         this.add.image(640, 360, 'background');
+        
+        var music = this.sound.add('menuMusic');
+        music.setLoop(true);
+        music.play();
+
         var button = this.add.text(100, 100, "Play");
         button.setInteractive();
-        button.on('pointerdown', function () {
+        button.on('pointerdown', function(){
+            music.stop();
             this.scene.start('game');
         }, this);
-    }
-});
+    },
+});*/
 
-var FullGame = new Phaser.Class({
+/*var FullGame = new Phaser.Class({
     Extends: Phaser.Scene,
 
-    initialize: function FullGame() {
+    initialize:
+    function FullGame(){
         Phaser.Scene.call(this, 'game');
     },
 
-    preload: function preload() {
+    preload: function(){
         this.load.image('background', background);
         this.load.image('blue', blue);
+        this.load.image('meteor', meteor);
+        this.load.image('bigastr', bigAstroid);
+        this.load.audio('sector1', sector1Music);
+        this.load.audio('transitionSector', transitionSector);
     },
 
-    create: function create() {
+    create: function(){
         //Background Creation
         this.add.image(640, 360, 'background');
+        
+        //Level Init - enemies and music
+        var music;
+        if (level == 1){
+            var transitionMusic = this.sound.add('transitionSector');
+            transitionMusic.play();
 
-        //Enemy Creation
-        if (level == 1) {
-            sendEnemiesLv1 = this.time.addEvent({ delay: delayLv1, callback: sendAsteroid, callbackScope: this, loop: true });
-        } else if (level == 2) {} else {}
+            /*music = this.sound.add('sector1');
+            music.setLoop(true);
+            music.play();
 
+            sendingEnemies = this.time.addEvent({ delay: delayLv1, callback: sendAsteroid, callbackScope: this, loop: true});
+            sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: sendbigAstr, callbackScope: this, loop: true});
+        }
+        else if(level == 2){
+
+        }
+        else{
+
+        }
+        
         //Create Player and Controls
-        player = this.physics.add.image(50, 360, 'blue');
+        player = this.physics.add.image(50, 360, 'meteor');
         cursors = this.input.keyboard.createCursorKeys();
 
         player.setDamping(true);
@@ -179,38 +441,56 @@ var FullGame = new Phaser.Class({
         player.body.bounce.set(1);
     },
 
-    update: function update() {
-        if (cursors.up.isDown) {
+    update: function(){
+        if (cursors.up.isDown){
             this.physics.velocityFromRotation(player.rotation, 200, player.body.acceleration);
-        } else {
+        }
+        else{
             player.setAcceleration(0);
         }
 
-        if (cursors.left.isDown) {
+        if (cursors.left.isDown){
             player.setAngularVelocity(-300);
-        } else if (cursors.right.isDown) {
+        }
+        else if (cursors.right.isDown){
             player.setAngularVelocity(300);
-        } else {
+        }
+        else{
             player.setAngularVelocity(0);
         }
     }
 });
 
-function sendAsteroid() {
+function sendAsteroid(){
     asteroids = this.physics.add.group({
         key: 'blue',
         repeat: Phaser.Math.Between(0, 1),
-        setXY: { x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250) }
+        setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
     });
 
-    asteroids.children.iterate(function (child) {
+    asteroids.children.iterate(function(child){
         child.body.velocity.setTo(Phaser.Math.Between(-175, -100), 0);
-    });
+    })
 
     this.physics.add.collider(player, asteroids, hitEnemy, null, this);
 }
 
-function hitEnemy() {
+function sendbigAstr(){
+    bigastr = this.physics.add.group({
+        key: 'bigAstr',
+        repeat: 0,
+        setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
+    });
+
+    bigastr.children.iterate(function(child){
+        child.body.velocity.setTo(Phaser.Math.Between(-100, -50), 0);
+    })
+
+    this.physics.add.collider(player, asteroids, hitEnemy, null, this);
+
+}
+
+function hitEnemy(){
     console.log("enemy hit");
     this.physics.pause();
 
@@ -218,7 +498,7 @@ function hitEnemy() {
 
     gameOver = true;
 }
-
+*/
 var config = {
     type: Phaser.AUTO,
     width: 1280,
@@ -230,11 +510,11 @@ var config = {
             gravity: { y: 0 }
         }
     },
-    scene: [Menu, FullGame]
+    scene: [_Menu2.default, _FullGame2.default]
 };
 
 var game = new Phaser.Game(config);
-},{"./game/assets/menu.png":"game/assets/menu.png","./game/assets/blue.png":"game/assets/blue.png"}],"../../../.nvm/versions/node/v10.1.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./game/Menu":"game/Menu.js","./game/FullGame":"game/FullGame.js"}],"../../../.nvm/versions/node/v10.1.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -263,7 +543,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '49324' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '61892' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
