@@ -50,6 +50,18 @@ export class FullGame extends Phaser.Scene{
     }
 
     preload(): void {
+        const progress = this.add.graphics();
+        
+        this.load.on('progress', (val) => {
+            progress.clear();
+            progress.fillStyle(0xffffff, 1);
+            progress.fillRect(140, 270, 1000 * val, 60)
+        })
+
+        this.load.on('complete', () => {
+            progress.destroy();
+        })
+
         this.load.image('background1', background1);
         this.load.image('meteor', meteor);
         this.load.image('bigastr', bigAstroid);
