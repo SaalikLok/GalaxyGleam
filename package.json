@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@types/howler": "^2.0.5",
     "declarations": "^0.1.16",
+    "howler": "^2.0.14",
     "phaser": "^3.11.0"
   },
   "devDependencies": {

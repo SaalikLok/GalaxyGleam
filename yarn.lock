@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/howler@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/howler/-/howler-2.0.5.tgz#eb5eb99b943fe423abe3ca713163ed911e2a0d76"
+
 ansi-regex@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
@@ -201,6 +205,10 @@ home-or-tmp@^2.0.0:
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.1"
+
+howler@^2.0.14:
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/howler/-/howler-2.0.14.tgz#28e37800fea002fea147a3ca033660c4f1288a99"
 
 invariant@^2.2.2:
   version "2.2.4"
