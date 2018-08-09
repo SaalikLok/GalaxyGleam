@@ -1,12 +1,16 @@
 import background1 from "./assets/background1.png";
+import transition from './assets/transition.png';
 import bigAstroid from './assets/bigastr.png';
 import medAstr from './assets/smallastr.png';
+import tinyAstr from './assets/tinyastr.png';
+import chunkAstr from './assets/chunkastr.png';
 import star from './assets/star.png'
 import star2 from './assets/star1.png'
 import meteor from './assets/meteor.png';
 import meteortail1 from './assets/tail.png';
 import meteortail2 from './assets/tail2.png';
 import meteortail3 from './assets/tail3.png';
+import barframe from './assets/barframe.png';
 
 //Sounds
 import transitionSector from './audio/tsector1.mp3';
@@ -53,6 +57,8 @@ export class FullGame extends Phaser.Scene{
     private starSound: Howl;
     private transitionBoom: Howl;
     private gameScore: Phaser.GameObjects.Text;
+    private levelBar: Phaser.GameObjects.Graphics;
+    private transitionMessage: Phaser.GameObjects.Text;
 
     constructor(){
         super({
@@ -75,14 +81,18 @@ export class FullGame extends Phaser.Scene{
 
         //graphics
         this.load.image('background1', background1);
+        this.load.image('transition', transition);
         this.load.image('meteor', meteor);
         this.load.image('bigastr', bigAstroid);
         this.load.image('medastr', medAstr);
+        this.load.image('tinyAstr', tinyAstr);
+        this.load.image('chunkAstr', chunkAstr);
         this.load.image('starSprite', star);
         this.load.image('starSprite2', star);
         this.load.image('meteortail1', meteortail1);
         this.load.image('meteortail2', meteortail2);
         this.load.image('meteortail3', meteortail3);
+        this.load.image('barframe', barframe);
 
         //audio
         this.load.audio('sector1', sector1Music);
@@ -114,7 +124,12 @@ export class FullGame extends Phaser.Scene{
         });
 
         //Add Score Text
-        this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff' });
+        this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Futura' });
+        this.levelBar = this.add.graphics({ x: 3, y: 28 });
+        this.levelBar.fillStyle(0xffffff, 0.85);
+        this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Futura' });
+        this.transitionMessage.setVisible(false);
+
 
         if (Constants.level == 1){
             this.playMusic = new Howl({
@@ -169,13 +184,26 @@ export class FullGame extends Phaser.Scene{
         player.body.collideWorldBounds = true;
         player.body.bounce.set(1);
         
-        this.time.addEvent({loop: true, delay: 2000, callback: this.addTimeScore})
+        this.time.addEvent({loop: true, delay: 2000, callback: this.addTimeScore, callbackScope: this});
     }
 
     update(): void{
         this.background.tilePositionX = this.background.tilePositionX + 5;
 
+        if(Constants.score < Constants.neededScore){
+            Constants.levelBarScore = Constants.score/Constants.neededScore;
+            this.levelBar.fillRect(16, 25, Constants.levelBarScore*200, 20);
+        }
+        else{
+            Constants.score = Constants.neededScore;
+            this.transitionMessage.setVisible(true);
+            this.levelBar.fillRect(16, 25, 200, 20); 
+            this.levelBar.fillStyle(0xF8E71C);
+
+
+        }
         this.gameScore.setText("Score: " + Constants.score);
+
 
         if (cursors.up.isDown){
             this.physics.velocityFromRotation(player.rotation, 200, player.body.acceleration);
@@ -193,7 +221,6 @@ export class FullGame extends Phaser.Scene{
         else{
             player.setAngularVelocity(0);
         }
-
     }
 
     sendAsteroid(): void{
@@ -245,7 +272,7 @@ export class FullGame extends Phaser.Scene{
         starSprite.body.velocity.setTo(-100, 0);
         starSprite.body.setAngularVelocity(Phaser.Math.Between(0, 5));
         starSprite.body.bounce.set(1);
-        starSprite.play('starpulse');
+        //starSprite.play('starpulse');
 
         this.physics.add.overlap(player, starSprite, this.addStarScore, null, this);
         this.physics.add.collider(starSprite, bigastr);
@@ -254,7 +281,7 @@ export class FullGame extends Phaser.Scene{
 
     addStarScore(player, star): void{
         star.disableBody(true, true);
-        starSprite.stop('starpulse');
+        //starSprite.stop('starpulse');
         this.starSound.play();
         Constants.score = Constants.score + 50;
     }
