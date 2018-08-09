@@ -2,7 +2,11 @@ import background1 from "./assets/background1.png";
 import bigAstroid from './assets/bigastr.png';
 import medAstr from './assets/smallastr.png';
 import star from './assets/star.png'
+import star2 from './assets/star1.png'
 import meteor from './assets/meteor.png';
+import meteortail1 from './assets/tail.png';
+import meteortail2 from './assets/tail2.png';
+import meteortail3 from './assets/tail3.png';
 
 //Sounds
 import transitionSector from './audio/tsector1.mp3';
@@ -75,6 +79,10 @@ export class FullGame extends Phaser.Scene{
         this.load.image('bigastr', bigAstroid);
         this.load.image('medastr', medAstr);
         this.load.image('starSprite', star);
+        this.load.image('starSprite2', star);
+        this.load.image('meteortail1', meteortail1);
+        this.load.image('meteortail2', meteortail2);
+        this.load.image('meteortail3', meteortail3);
 
         //audio
         this.load.audio('sector1', sector1Music);
@@ -112,11 +120,13 @@ export class FullGame extends Phaser.Scene{
             this.playMusic = new Howl({
                 src:[transitionSector],
                 autoplay: true,
+                volume: 1.3,
                 onend: () => {
                     this.playMusic = new Howl({
                         src:[sector1Music],
                         loop: true,
-                        autoplay: true
+                        autoplay: true,
+                        volume: 1.3
                     })
                 }
             });
@@ -137,10 +147,22 @@ export class FullGame extends Phaser.Scene{
         }
         
         //Create Player and Controls
-        player = this.physics.add.image(50, 360, 'meteor');
+        /*this.anims.create({
+            key: 'meteorAnimation',
+            frames: [
+                {key: 'meteortail1'},
+                {key: 'meteortail2'},
+                {key: 'meteortail3'},
+            ],
+            frameRate: 12,
+            repeat: -1,
+        });*/
+
+        player = this.physics.add.sprite(50, 360, 'meteor');
+        //player.play('meteorAnimation');
         cursors = this.input.keyboard.createCursorKeys();
 
-        player.setCircle(30, 0, 2);
+        player.setCircle(35, 0, 2);
         player.setDamping(true);
         player.setDrag(0.99);
         player.setMaxVelocity(200);
@@ -185,7 +207,7 @@ export class FullGame extends Phaser.Scene{
             child.body.velocity.setTo(Phaser.Math.Between(-175, -100), 0);
             child.body.setAngularVelocity(Phaser.Math.Between(0, 150));
             child.body.setCircle(35, 10, 12);
-        })
+        });
     
         this.physics.add.collider(player, asteroids, this.hitEnemy, null, this);
     }
@@ -201,30 +223,38 @@ export class FullGame extends Phaser.Scene{
             child.body.velocity.setTo(Phaser.Math.Between(-100, -50), 0);
             child.body.setAngularVelocity(Phaser.Math.Between(0, 20));
             child.body.setCircle(95, 10, 25)
-        })
+        });
     
         this.physics.add.collider(player, bigastr, this.hitEnemy, null, this);
     
     }
 
     sendStar(): void{
-        starSprite = this.physics.add.group({
-            key:'starSprite',
-            repeat: 0,
-            setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
-        })
+        starSprite = this.physics.add.sprite(1400, Phaser.Math.Between(50, 600), 'starSprite');
 
-        starSprite.children.iterate(function(child){
-            child.body.velocity.setTo(-100, 0);
-            child.body.setAngularVelocity(Phaser.Math.Between(0, 5));
-            //child.body.setCircle(95, 10, 25)
-        })
+        this.anims.create({
+            key: 'starpulse',
+            frames: [
+                {key: 'starSprite'},
+                {key: 'starSprite2'},
+            ],
+            repeat: -1,
+            frameRate: 4,
+        });
+
+        starSprite.body.velocity.setTo(-100, 0);
+        starSprite.body.setAngularVelocity(Phaser.Math.Between(0, 5));
+        starSprite.body.bounce.set(1);
+        starSprite.play('starpulse');
 
         this.physics.add.overlap(player, starSprite, this.addStarScore, null, this);
+        this.physics.add.collider(starSprite, bigastr);
+        this.physics.add.collider(starSprite, asteroids);
     }
 
     addStarScore(player, star): void{
         star.disableBody(true, true);
+        starSprite.stop('starpulse');
         this.starSound.play();
         Constants.score = Constants.score + 50;
     }
@@ -236,8 +266,6 @@ export class FullGame extends Phaser.Scene{
     
         this.playMusic.stop();
         player.setTint(0xff0000);
-    
-        //this.game.destroy(true);
     }
 
     addTimeScore(): void{
