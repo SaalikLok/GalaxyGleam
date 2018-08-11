@@ -1,4 +1,5 @@
 import background1 from "./assets/background1.png";
+import background2 from "./assets/background2.png";
 import transition from './assets/transition.png';
 import bigAstroid from './assets/bigastr.png';
 import medAstr from './assets/smallastr.png';
@@ -34,14 +35,20 @@ import "phaser";
 
 //Instance variables
 let cursors;
-let player;
+//let player;
 let clock;
 let clockstart;
+
+//Keys
+let spaceKey;
 
 //Enemy instance variables
 let asteroids;
 let bigastr;
 let starSprite;
+let sendingStar;
+let sendingBigAstr;
+let sendingMedAstr;
 
 //Delay Timings
 var delayLv0 = Phaser.Math.Between(15000, 20000);
@@ -51,6 +58,8 @@ var delayLv3 = Phaser.Math.Between(750, 1500);
 
 export class FullGame extends Phaser.Scene{
     private background: Phaser.GameObjects.TileSprite;
+    private backgroundSpeed: integer;
+    private player: Phaser.GameObjects.Sprite;
     private playMusic: Howl;
     private crashSound: Howl;
     private menuClick: Howl;
@@ -81,6 +90,7 @@ export class FullGame extends Phaser.Scene{
 
         //graphics
         this.load.image('background1', background1);
+        this.load.image('background2', background2);
         this.load.image('transition', transition);
         this.load.image('meteor', meteor);
         this.load.image('bigastr', bigAstroid);
@@ -104,8 +114,8 @@ export class FullGame extends Phaser.Scene{
     }
 
     create(): void {
-        //Background Creation 
-        this.background = this.add.tileSprite(640, 360, 1280, 720, 'background1');
+        //Keys Created
+        spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
         //Init Soundfx
         this.crashSound = new Howl({
@@ -123,15 +133,78 @@ export class FullGame extends Phaser.Scene{
             volume: 1
         });
 
+        this.setStage();
+
         //Add Score Text
+        this.backgroundSpeed = 5;
         this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Futura' });
         this.levelBar = this.add.graphics({ x: 3, y: 28 });
         this.levelBar.fillStyle(0xffffff, 0.85);
         this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Futura' });
         this.transitionMessage.setVisible(false);
+        
+        
+        //Create Player and Controls
+        this.player = this.physics.add.sprite(50, 360, 'meteor');
+        //player.play('meteorAnimation');
+        cursors = this.input.keyboard.createCursorKeys();
+
+        this.player.setCircle(35, 0, 2);
+        this.player.setDamping(true);
+        this.player.setDrag(0.99);
+        this.player.setMaxVelocity(200);
+        this.player.body.collideWorldBounds = true;
+        this.player.body.bounce.set(1);
+        
+        this.time.addEvent({loop: true, delay: 2000, callback: this.addTimeScore, callbackScope: this});
+    }
+
+    update(): void{
+        this.background.tilePositionX = this.background.tilePositionX + this.backgroundSpeed;
+
+        if(Constants.score < Constants.neededScore){
+            Constants.levelBarScore = Constants.score/Constants.neededScore;
+            this.levelBar.fillRect(16, 25, Constants.levelBarScore*200, 20);
+        }
+        else{
+            Constants.score = Constants.neededScore;
+            this.transitionMessage.setVisible(true);
+            this.levelBar.fillRect(16, 25, 200, 20); 
+            this.levelBar.fillStyle(0xF8E71C);
+
+            if(spaceKey.isDown){
+                this.handleTransition();
+            }
+            
+        }
+        this.gameScore.setText("Score: " + Constants.score);
 
 
+        if (cursors.up.isDown){
+            this.physics.velocityFromRotation(this.player.rotation, 200, this.player.body.acceleration);
+        }
+        else{
+            this.player.setAcceleration(0);
+        }
+
+        if (cursors.left.isDown){
+            this.player.setAngularVelocity(-300);
+        }
+        else if (cursors.right.isDown){
+            this.player.setAngularVelocity(300);
+        }
+        else{
+            this.player.setAngularVelocity(0);
+        }
+    }
+
+    setStage(): void{
         if (Constants.level == 1){
+            
+            //Set background
+            this.background = this.add.tileSprite(640, 360, 1280, 720, 'background1');
+
+            //Set music
             this.playMusic = new Howl({
                 src:[transitionSector],
                 autoplay: true,
@@ -146,80 +219,42 @@ export class FullGame extends Phaser.Scene{
                 }
             });
 
-            const sendingStar = this.time.addEvent({ delay: delayLv0, callback: this.sendStar, callbackScope: this, loop: true});
-            const sendingEnemies = this.time.addEvent({ delay: delayLv1, callback: this.sendAsteroid, callbackScope: this, loop: true});
-            const sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendbigAstr, callbackScope: this, loop: true});
+            //Set enemies and items
+            sendingStar = this.time.addEvent({ delay: delayLv0, callback: this.sendStar, callbackScope: this, loop: true});
+            sendingMedAstr = this.time.addEvent({ delay: delayLv1, callback: this.sendAsteroid, callbackScope: this, loop: true});
+            sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendbigAstr, callbackScope: this, loop: true});
         }
         else if(Constants.level == 2){
+            //Set background
+            this.background = this.add.tileSprite(640, 360, 1280, 720, 'background2');
+            this.backgroundSpeed = 5;
+            
+            this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Futura' });
+            this.levelBar = this.add.graphics({ x: 3, y: 28 });
+            this.levelBar.fillStyle(0xffffff, 0.85);
+            this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Futura' });
+            this.transitionMessage.setVisible(false);
+
+            this.player = this.physics.add.sprite(50, 360, 'meteor');
+
+            this.player.setCircle(35, 0, 2);
+            this.player.setDamping(true);
+            this.player.setDrag(0.99);
+            this.player.setMaxVelocity(200);
+            this.player.body.collideWorldBounds = true;
+            this.player.body.bounce.set(1);
+
+            //Set music
             this.playMusic = new Howl({
                 src:[sector2Music],
                 loop: true,
                 autoplay: true
             })
+
+            sendingStar = this.time.addEvent({ delay: delayLv0, callback: this.sendStar, callbackScope: this, loop: true});
         }
         else{
 
-        }
-        
-        //Create Player and Controls
-        /*this.anims.create({
-            key: 'meteorAnimation',
-            frames: [
-                {key: 'meteortail1'},
-                {key: 'meteortail2'},
-                {key: 'meteortail3'},
-            ],
-            frameRate: 12,
-            repeat: -1,
-        });*/
-
-        player = this.physics.add.sprite(50, 360, 'meteor');
-        //player.play('meteorAnimation');
-        cursors = this.input.keyboard.createCursorKeys();
-
-        player.setCircle(35, 0, 2);
-        player.setDamping(true);
-        player.setDrag(0.99);
-        player.setMaxVelocity(200);
-        player.body.collideWorldBounds = true;
-        player.body.bounce.set(1);
-        
-        this.time.addEvent({loop: true, delay: 2000, callback: this.addTimeScore, callbackScope: this});
-    }
-
-    update(): void{
-        this.background.tilePositionX = this.background.tilePositionX + 5;
-
-        if(Constants.score < Constants.neededScore){
-            Constants.levelBarScore = Constants.score/Constants.neededScore;
-            this.levelBar.fillRect(16, 25, Constants.levelBarScore*200, 20);
-        }
-        else{
-            Constants.score = Constants.neededScore;
-            this.transitionMessage.setVisible(true);
-            this.levelBar.fillRect(16, 25, 200, 20); 
-            this.levelBar.fillStyle(0xF8E71C);
-
-
-        }
-        this.gameScore.setText("Score: " + Constants.score);
-
-
-        if (cursors.up.isDown){
-            this.physics.velocityFromRotation(player.rotation, 200, player.body.acceleration);
-        }
-        else{
-            player.setAcceleration(0);
-        }
-
-        if (cursors.left.isDown){
-            player.setAngularVelocity(-300);
-        }
-        else if (cursors.right.isDown){
-            player.setAngularVelocity(300);
-        }
-        else{
-            player.setAngularVelocity(0);
         }
     }
 
@@ -236,7 +271,7 @@ export class FullGame extends Phaser.Scene{
             child.body.setCircle(35, 10, 12);
         });
     
-        this.physics.add.collider(player, asteroids, this.hitEnemy, null, this);
+        this.physics.add.collider(this.player, asteroids, this.hitEnemy, null, this);
     }
     
     sendbigAstr(): void{
@@ -252,14 +287,14 @@ export class FullGame extends Phaser.Scene{
             child.body.setCircle(95, 10, 25)
         });
     
-        this.physics.add.collider(player, bigastr, this.hitEnemy, null, this);
+        this.physics.add.collider(this.player, bigastr, this.hitEnemy, null, this);
     
     }
 
     sendStar(): void{
         starSprite = this.physics.add.sprite(1400, Phaser.Math.Between(50, 600), 'starSprite');
 
-        this.anims.create({
+        /*this.anims.create({
             key: 'starpulse',
             frames: [
                 {key: 'starSprite'},
@@ -267,14 +302,13 @@ export class FullGame extends Phaser.Scene{
             ],
             repeat: -1,
             frameRate: 4,
-        });
+        });*/
 
         starSprite.body.velocity.setTo(-100, 0);
         starSprite.body.setAngularVelocity(Phaser.Math.Between(0, 5));
         starSprite.body.bounce.set(1);
-        //starSprite.play('starpulse');
 
-        this.physics.add.overlap(player, starSprite, this.addStarScore, null, this);
+        this.physics.add.overlap(this.player, starSprite, this.addStarScore, null, this);
         this.physics.add.collider(starSprite, bigastr);
         this.physics.add.collider(starSprite, asteroids);
     }
@@ -292,10 +326,43 @@ export class FullGame extends Phaser.Scene{
         this.physics.pause();
     
         this.playMusic.stop();
-        player.setTint(0xff0000);
+        this.player.setTint(0xff0000);
     }
 
     addTimeScore(): void{
         Constants.score++;
+    }
+
+    handleTransition(): void{
+        bigastr.destroy();
+        starSprite.destroy();
+        asteroids.destroy();
+        sendingBigAstr.destroy();
+        sendingMedAstr.destroy();
+        sendingStar.destroy();
+        this.playMusic.stop();
+        Constants.level++;
+        Constants.oldScore = Constants.neededScore;
+        Constants.neededScore = Constants.neededScore * 3;
+        Constants.levelBarScore = 0;
+        this.background.destroy();
+        //this.player = "";
+        this.playTransition();
+        //this.setStage();
+    }
+
+    playTransition(): void{
+        this.background = this.add.tileSprite(640, 360, 1280, 720, 'transition');
+        this.player = this.physics.add.sprite(50, 360, 'meteor');
+
+        this.backgroundSpeed = 50;
+        this.transitionBoom.play();
+
+        setTimeout(() => {
+            this.transitionBoom.stop();
+            this.background.destroy();
+            Constants.score = Constants.oldScore;
+            this.setStage();
+        }, 10000)
     }
 }
