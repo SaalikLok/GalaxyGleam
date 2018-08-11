@@ -20,7 +20,7 @@ const config: GameConfig = {
         arcade: {
             fps: 60,
             gravity: { y: 0 },
-            debug: true
+            debug: false
         },
     },
     scene: [ Menu, FullGame ]
