@@ -11,7 +11,6 @@ import meteor from './assets/meteor.png';
 import meteortail1 from './assets/tail.png';
 import meteortail2 from './assets/tail2.png';
 import meteortail3 from './assets/tail3.png';
-import barframe from './assets/barframe.png';
 
 //Sounds
 import transitionSector from './audio/tsector1.mp3';
@@ -102,7 +101,6 @@ export class FullGame extends Phaser.Scene{
         this.load.image('meteortail1', meteortail1);
         this.load.image('meteortail2', meteortail2);
         this.load.image('meteortail3', meteortail3);
-        this.load.image('barframe', barframe);
 
         //audio
         this.load.audio('sector1', sector1Music);
@@ -137,10 +135,10 @@ export class FullGame extends Phaser.Scene{
 
         //Add Score Text
         this.backgroundSpeed = 5;
-        this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Futura' });
+        this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Courier' });
         this.levelBar = this.add.graphics({ x: 3, y: 28 });
         this.levelBar.fillStyle(0xffffff, 0.85);
-        this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Futura' });
+        this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Courier' });
         this.transitionMessage.setVisible(false);
         
         
