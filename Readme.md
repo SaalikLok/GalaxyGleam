@@ -18,9 +18,9 @@ All in all, this is a game made completely from scratch, helped by some pretty a
 ## The Tools
 To build the game on a technical level, here's what I used:
 
-Game Engine: [Phaser 3](http://phaser.io)
-Audio Engine: [Howler](http://howlerjs.com)
-Bundler: [Parcel](http://parceljs.org)
+- Game Engine: [Phaser 3](http://phaser.io)
+- Audio Engine: [Howler](http://howlerjs.com)
+- Bundler: [Parcel](http://parceljs.org)
 
 ## Contact
 Questions, comments? Reach out to me: saalik@lytebulb.tech
