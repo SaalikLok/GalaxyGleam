@@ -62,8 +62,8 @@ let sendingTinyAstr;
 const delayLv0 = Phaser.Math.Between(15000, 20000);
 const delayStar = Phaser.Math.Between(10000, 25000);
 const delayLv1 = Phaser.Math.Between(2500, 4000);
-const delayLv2 = Phaser.Math.Between(1000, 2000);
-const delayLv3 = Phaser.Math.Between(750, 1500);
+const delayLv2 = Phaser.Math.Between(2000, 3000);
+const delayLv3 = Phaser.Math.Between(1000, 2000);
 
 export class FullGame extends Phaser.Scene{
     private background: Phaser.GameObjects.TileSprite;
@@ -375,10 +375,10 @@ export class FullGame extends Phaser.Scene{
         starSprite.body.bounce.set(0);
 
         this.physics.add.overlap(this.player, starSprite, this.addStarScore, null, this);
-        this.physics.add.collider(starSprite, bigastrGroup);
+        /*this.physics.add.collider(starSprite, bigastrGroup);
         this.physics.add.collider(starSprite, asteroidGroup);
         this.physics.add.collider(starSprite, tinyAstrGroup);
-        this.physics.add.collider(starSprite, chunkAstrGroup);
+        this.physics.add.collider(starSprite, chunkAstrGroup);*/
     }
 
     addStarScore(player, star): void{
