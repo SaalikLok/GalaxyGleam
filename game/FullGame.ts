@@ -40,7 +40,6 @@ import "phaser";
 
 //Instance variables
 let cursors;
-//let player;
 let clock;
 let clockstart;
 
@@ -153,6 +152,7 @@ export class FullGame extends Phaser.Scene{
     update(): void{
         this.background.tilePositionX = this.background.tilePositionX + this.backgroundSpeed;
 
+        // Updating the level bar
         if(Constants.score < Constants.neededScore){
             Constants.levelBarScore = Constants.score/Constants.neededScore;
             this.levelBar.fillRect(16, 25, Constants.levelBarScore*200, 20);
@@ -163,14 +163,14 @@ export class FullGame extends Phaser.Scene{
             this.levelBar.fillRect(16, 25, 200, 20); 
             this.levelBar.fillStyle(0xF8E71C);
 
+            //If the level bar is full, allow the transition to be activated.
             if(spaceKey.isDown){
                 this.handleTransition();
-            }
-            
+            }   
         }
         this.gameScore.setText("Score: " + Constants.score);
 
-
+        // Control the player with cursor keys
         if (cursors.up.isDown){
             this.physics.velocityFromRotation(this.player.rotation, 200, this.player.body.acceleration);
         }
@@ -189,6 +189,7 @@ export class FullGame extends Phaser.Scene{
         }
     }
 
+    // Sets the world based on what level the player is on.
     setStage(): void{
         if (Constants.level == 1){
             
@@ -404,7 +405,6 @@ export class FullGame extends Phaser.Scene{
     }
 
     handleTransition(): void{
-        
         if(Constants.level < 3){
             this.physics.pause();    
             bigastrGroup.clear(true, true);
@@ -446,7 +446,6 @@ export class FullGame extends Phaser.Scene{
 
     playTransition(): void{
         this.background = this.add.tileSprite(640, 360, 1280, 720, 'transition');
-        //this.player = this.physics.add.sprite(50, 360, 'meteor');
 
         this.backgroundSpeed = 50;
         this.transitionBoom.play();
