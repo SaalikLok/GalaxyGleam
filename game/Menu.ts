@@ -65,7 +65,7 @@ export class Menu extends Phaser.Scene{
     }
 
     createMenu(): void{
-        this.playButton = this.add.text(610, 250, "Play");
+        this.playButton = this.add.text(600, 250, "Play");
         this.playButton.setFontFamily(this.fontName);
         this.playButton.setFontSize(40);
         this.playButton.setInteractive();
@@ -75,7 +75,7 @@ export class Menu extends Phaser.Scene{
             this.scene.start("FullGame");
         }, this);
 
-        this.creditsButton = this.add.text(605, 320, "Credits");
+        this.creditsButton = this.add.text(595, 320, "Credits");
         this.creditsButton.setFontFamily(this.fontName);
         this.creditsButton.setFontSize(25);
         this.creditsButton.setInteractive();
@@ -85,7 +85,7 @@ export class Menu extends Phaser.Scene{
             this.createCredits();
         }, this);
 
-        this.controlsButton = this.add.text(600, 370, "Controls");
+        this.controlsButton = this.add.text(590, 370, "Controls");
         this.controlsButton.setFontFamily(this.fontName);
         this.controlsButton.setFontSize(25);
         this.controlsButton.setInteractive();
@@ -95,7 +95,7 @@ export class Menu extends Phaser.Scene{
             this.createControls();
         }, this);
 
-        const copyrightText = this.add.text(520, 30, "The Beboin Bros present:");
+        const copyrightText = this.add.text(510, 30, "Saalik, Kaamil and Nabeel present:");
         copyrightText.setFontFamily(this.fontName);
 
         const titleText = this.add.text(520, 60, "Galaxy Gleam");

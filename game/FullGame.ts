@@ -1,5 +1,10 @@
+import load1 from './assets/load1.png';
+import load2 from './assets/load2.png';
+import load3 from './assets/load3.png';
+import load4 from './assets/load4.png';
 import background1 from "./assets/background1.png";
 import background2 from "./assets/background2.png";
+import background3 from "./assets/background3.png";
 import transition from './assets/transition.png';
 import bigAstroid from './assets/bigastr.png';
 import medAstr from './assets/smallastr.png';
@@ -16,6 +21,7 @@ import meteortail3 from './assets/tail3.png';
 import transitionSector from './audio/tsector1.mp3';
 import sector1Music from './audio/sector1.mp3';
 import sector2Music from './audio/sector2.mp3';
+import sector3Music from './audio/sector3.mp3';
 import crash from './audio/crash.mp3';
 import star1 from './audio/star1.mp3';
 import transitionBoom from './audio/TransitionBOOM.mp3';
@@ -42,18 +48,23 @@ let clockstart;
 let spaceKey;
 
 //Enemy instance variables
-let asteroids;
-let bigastr;
+let asteroidGroup;
+let bigastrGroup;
+let tinyAstrGroup;
+let chunkAstrGroup;
 let starSprite;
 let sendingStar;
 let sendingBigAstr;
 let sendingMedAstr;
+let sendingChunkAstr;
+let sendingTinyAstr;
 
 //Delay Timings
-var delayLv0 = Phaser.Math.Between(15000, 20000);
-var delayLv1 = Phaser.Math.Between(2500, 4000);
-var delayLv2 = Phaser.Math.Between(1000, 2000);
-var delayLv3 = Phaser.Math.Between(750, 1500);
+const delayLv0 = Phaser.Math.Between(15000, 20000);
+const delayStar = Phaser.Math.Between(10000, 25000);
+const delayLv1 = Phaser.Math.Between(2500, 4000);
+const delayLv2 = Phaser.Math.Between(1000, 2000);
+const delayLv3 = Phaser.Math.Between(750, 1500);
 
 export class FullGame extends Phaser.Scene{
     private background: Phaser.GameObjects.TileSprite;
@@ -80,7 +91,7 @@ export class FullGame extends Phaser.Scene{
         this.load.on('progress', (val) => {
             progress.clear();
             progress.fillStyle(0xffffff, 1);
-            progress.fillRect(140, 270, 1000 * val, 60)
+            progress.fillRect(140, 270, 1000 * val, 60);
         });
 
         this.load.on('complete', () => {
@@ -90,6 +101,7 @@ export class FullGame extends Phaser.Scene{
         //graphics
         this.load.image('background1', background1);
         this.load.image('background2', background2);
+        this.load.image('background3', background3);
         this.load.image('transition', transition);
         this.load.image('meteor', meteor);
         this.load.image('bigastr', bigAstroid);
@@ -105,6 +117,7 @@ export class FullGame extends Phaser.Scene{
         //audio
         this.load.audio('sector1', sector1Music);
         this.load.audio('sector2', sector2Music);
+        this.load.audio('sector3', sector3Music);
         this.load.audio('transitionSector', transitionSector);
         this.load.audio('crash', crash);
         this.load.audio('star1', star1);
@@ -130,31 +143,11 @@ export class FullGame extends Phaser.Scene{
             src: [transitionBoom],
             volume: 1
         });
+        this.time.addEvent({loop: true, delay: 2000, callback: this.addTimeScore, callbackScope: this});
+        cursors = this.input.keyboard.createCursorKeys();
 
         this.setStage();
 
-        //Add Score Text
-        this.backgroundSpeed = 5;
-        this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Courier' });
-        this.levelBar = this.add.graphics({ x: 3, y: 28 });
-        this.levelBar.fillStyle(0xffffff, 0.85);
-        this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Courier' });
-        this.transitionMessage.setVisible(false);
-        
-        
-        //Create Player and Controls
-        this.player = this.physics.add.sprite(50, 360, 'meteor');
-        //player.play('meteorAnimation');
-        cursors = this.input.keyboard.createCursorKeys();
-
-        this.player.setCircle(35, 0, 2);
-        this.player.setDamping(true);
-        this.player.setDrag(0.99);
-        this.player.setMaxVelocity(200);
-        this.player.body.collideWorldBounds = true;
-        this.player.body.bounce.set(1);
-        
-        this.time.addEvent({loop: true, delay: 2000, callback: this.addTimeScore, callbackScope: this});
     }
 
     update(): void{
@@ -201,7 +194,25 @@ export class FullGame extends Phaser.Scene{
             
             //Set background
             this.background = this.add.tileSprite(640, 360, 1280, 720, 'background1');
+            //Add Score Text
+            this.backgroundSpeed = 5;
+            this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Courier' });
+            this.levelBar = this.add.graphics({ x: 3, y: 28 });
+            this.levelBar.fillStyle(0xffffff, 0.85);
+            this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Courier' });
+            this.transitionMessage.setVisible(false);
+            
+            
+            //Create Player and Controls
+            this.player = this.physics.add.sprite(50, 360, 'meteor');
 
+            this.player.setCircle(35, 0, 2);
+            this.player.setDamping(true);
+            this.player.setDrag(0.99);
+            this.player.setMaxVelocity(200);
+            this.player.body.collideWorldBounds = true;
+            this.player.body.bounce.set(1);
+            
             //Set music
             this.playMusic = new Howl({
                 src:[transitionSector],
@@ -218,21 +229,22 @@ export class FullGame extends Phaser.Scene{
             });
 
             //Set enemies and items
-            sendingStar = this.time.addEvent({ delay: delayLv0, callback: this.sendStar, callbackScope: this, loop: true});
+            sendingStar = this.time.addEvent({ delay: delayStar, callback: this.sendStar, callbackScope: this, loop: true});
             sendingMedAstr = this.time.addEvent({ delay: delayLv1, callback: this.sendAsteroid, callbackScope: this, loop: true});
             sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendbigAstr, callbackScope: this, loop: true});
         }
         else if(Constants.level == 2){
+            this.physics.resume();
             //Set background
             this.background = this.add.tileSprite(640, 360, 1280, 720, 'background2');
             this.backgroundSpeed = 5;
             
-            this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Futura' });
+            this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Courier' });
             this.levelBar = this.add.graphics({ x: 3, y: 28 });
             this.levelBar.fillStyle(0xffffff, 0.85);
-            this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Futura' });
+            this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Courier' });
             this.transitionMessage.setVisible(false);
-
+            this.player = "";
             this.player = this.physics.add.sprite(50, 360, 'meteor');
 
             this.player.setCircle(35, 0, 2);
@@ -249,71 +261,127 @@ export class FullGame extends Phaser.Scene{
                 autoplay: true
             })
 
-            sendingStar = this.time.addEvent({ delay: delayLv0, callback: this.sendStar, callbackScope: this, loop: true});
+            sendingStar = this.time.addEvent({ delay: delayStar, callback: this.sendStar, callbackScope: this, loop: true});
+            sendingMedAstr = this.time.addEvent({ delay: delayLv1, callback: this.sendAsteroid, callbackScope: this, loop: true});
+            sendingChunkAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendChunkAstr, callbackScope: this, loop: true});
+            sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendbigAstr, callbackScope: this, loop: true});
         }
         else{
+            this.physics.resume();
+            this.background = this.add.tileSprite(640, 360, 1280, 720, 'background3');
+            this.backgroundSpeed = 5;
+            
+            this.gameScore = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#ffffff', fontFamily: 'Courier' });
+            this.levelBar = this.add.graphics({ x: 3, y: 28 });
+            this.levelBar.fillStyle(0xffffff, 0.85);
+            this.transitionMessage = this.add.text(16, 80, 'Press <Space> to get to the new world!', { fontSize: '12px', fill: '#F8E71C', fontFamily: 'Courier' });
+            this.transitionMessage.setVisible(false);
 
+            this.player = this.physics.add.sprite(50, 360, 'meteor');
+
+            this.player.setCircle(35, 0, 2);
+            this.player.setDamping(true);
+            this.player.setDrag(0.99);
+            this.player.setMaxVelocity(200);
+            this.player.body.collideWorldBounds = true;
+            this.player.body.bounce.set(1);
+
+            //Set music
+            this.playMusic = new Howl({
+                src:[sector3Music],
+                loop: true,
+                autoplay: true
+            })
+
+            sendingStar = this.time.addEvent({ delay: delayStar, callback: this.sendStar, callbackScope: this, loop: true});
+            sendingMedAstr = this.time.addEvent({ delay: delayLv1, callback: this.sendAsteroid, callbackScope: this, loop: true});
+            sendingChunkAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendChunkAstr, callbackScope: this, loop: true});
+            sendingBigAstr = this.time.addEvent({ delay: delayLv0, callback: this.sendbigAstr, callbackScope: this, loop: true});
+            sendingTinyAstr = this.time.addEvent({ delay: delayLv2, callback: this.sendTinyAstr, callbackScope: this, loop: true});
         }
     }
 
     sendAsteroid(): void{
-        asteroids = this.physics.add.group({
+        asteroidGroup = this.physics.add.group({
             key: 'medastr',
             repeat: Phaser.Math.Between(0, 1),
             setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
         });
     
-        asteroids.children.iterate(function(child){
+        asteroidGroup.children.iterate(function(child){
             child.body.velocity.setTo(Phaser.Math.Between(-175, -100), 0);
             child.body.setAngularVelocity(Phaser.Math.Between(0, 150));
-            child.body.setCircle(35, 10, 12);
+            child.body.setCircle(35, 10, 11);
         });
     
-        this.physics.add.collider(this.player, asteroids, this.hitEnemy, null, this);
+        this.physics.add.collider(this.player, asteroidGroup, this.hitEnemy, null, this);
     }
     
     sendbigAstr(): void{
-        bigastr = this.physics.add.group({
+        bigastrGroup = this.physics.add.group({
             key: 'bigastr',
             repeat: 0,
             setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
         });
     
-        bigastr.children.iterate(function(child){
+        bigastrGroup.children.iterate(function(child){
             child.body.velocity.setTo(Phaser.Math.Between(-100, -50), 0);
             child.body.setAngularVelocity(Phaser.Math.Between(0, 20));
             child.body.setCircle(95, 10, 25)
         });
     
-        this.physics.add.collider(this.player, bigastr, this.hitEnemy, null, this);
+        this.physics.add.collider(this.player, bigastrGroup, this.hitEnemy, null, this);
     
+    }
+
+    sendChunkAstr(): void{
+        chunkAstrGroup = this.physics.add.group({
+            key: 'chunkAstr',
+            repeat: 0,
+            setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
+        });
+    
+        chunkAstrGroup.children.iterate(function(child){
+            child.body.velocity.setTo(Phaser.Math.Between(-175, -150), 0);
+            child.body.setAngularVelocity(Phaser.Math.Between(0, 100));
+            child.body.setCircle(35, 10, 12)
+        });
+    
+        this.physics.add.collider(this.player, chunkAstrGroup, this.hitEnemy, null, this);
+    }
+
+    sendTinyAstr(): void{
+        tinyAstrGroup = this.physics.add.group({
+            key: 'tinyAstr',
+            repeat: 0,
+            setXY: {x: 1400, y: Phaser.Math.Between(50, 600), stepY: Phaser.Math.Between(75, 250)}
+        });
+    
+        tinyAstrGroup.children.iterate(function(child){
+            child.body.velocity.setTo(Phaser.Math.Between(-250, -175), 0);
+            child.body.setAngularVelocity(Phaser.Math.Between(80, 150));
+            child.body.setCircle(18, 10, 12)
+        });
+    
+        this.physics.add.collider(this.player, tinyAstrGroup, this.hitEnemy, null, this);
     }
 
     sendStar(): void{
         starSprite = this.physics.add.sprite(1400, Phaser.Math.Between(50, 600), 'starSprite');
 
-        /*this.anims.create({
-            key: 'starpulse',
-            frames: [
-                {key: 'starSprite'},
-                {key: 'starSprite2'},
-            ],
-            repeat: -1,
-            frameRate: 4,
-        });*/
-
         starSprite.body.velocity.setTo(-100, 0);
         starSprite.body.setAngularVelocity(Phaser.Math.Between(0, 5));
-        starSprite.body.bounce.set(1);
+        starSprite.body.bounce.set(0);
 
         this.physics.add.overlap(this.player, starSprite, this.addStarScore, null, this);
-        this.physics.add.collider(starSprite, bigastr);
-        this.physics.add.collider(starSprite, asteroids);
+        this.physics.add.collider(starSprite, bigastrGroup);
+        this.physics.add.collider(starSprite, asteroidGroup);
+        this.physics.add.collider(starSprite, tinyAstrGroup);
+        this.physics.add.collider(starSprite, chunkAstrGroup);
     }
 
     addStarScore(player, star): void{
         star.disableBody(true, true);
-        //starSprite.stop('starpulse');
         this.starSound.play();
         Constants.score = Constants.score + 50;
     }
@@ -325,6 +393,10 @@ export class FullGame extends Phaser.Scene{
     
         this.playMusic.stop();
         this.player.setTint(0xff0000);
+
+        setTimeout(() => {
+            this.scene.start('GameOver');   
+        }, 1000);
     }
 
     addTimeScore(): void{
@@ -332,26 +404,49 @@ export class FullGame extends Phaser.Scene{
     }
 
     handleTransition(): void{
-        bigastr.destroy();
-        starSprite.destroy();
-        asteroids.destroy();
-        sendingBigAstr.destroy();
-        sendingMedAstr.destroy();
-        sendingStar.destroy();
-        this.playMusic.stop();
-        Constants.level++;
-        Constants.oldScore = Constants.neededScore;
-        Constants.neededScore = Constants.neededScore * 3;
-        Constants.levelBarScore = 0;
-        this.background.destroy();
-        //this.player = "";
-        this.playTransition();
-        //this.setStage();
+        
+        if(Constants.level < 3){
+            this.physics.pause();    
+            bigastrGroup.clear(true, true);
+            starSprite.destroy();
+            asteroidGroup.clear(true, true);
+    
+            if(tinyAstrGroup){
+                tinyAstrGroup.clear(true, true);
+            }
+    
+            if(chunkAstrGroup){
+                chunkAstrGroup.clear(true, true);
+            }
+    
+            if(sendingChunkAstr){
+                sendingChunkAstr = "";
+            }
+    
+            if(sendingTinyAstr){
+                sendingTinyAstr = "";
+            }
+    
+            sendingBigAstr = "";
+            sendingMedAstr = "";
+            sendingStar = "";
+    
+            this.playMusic.stop();
+            Constants.level++;
+            Constants.oldScore = Constants.neededScore;
+            Constants.neededScore = Constants.neededScore * 3;
+            Constants.levelBarScore = 0;
+            this.background.destroy();
+            this.playTransition();
+        }
+        else{
+            this.scene.start('GameOver');
+        }
     }
 
     playTransition(): void{
         this.background = this.add.tileSprite(640, 360, 1280, 720, 'transition');
-        this.player = this.physics.add.sprite(50, 360, 'meteor');
+        //this.player = this.physics.add.sprite(50, 360, 'meteor');
 
         this.backgroundSpeed = 50;
         this.transitionBoom.play();
@@ -359,6 +454,7 @@ export class FullGame extends Phaser.Scene{
         setTimeout(() => {
             this.transitionBoom.stop();
             this.background.destroy();
+            this.player.destroy(); 
             Constants.score = Constants.oldScore;
             this.setStage();
         }, 10000)
