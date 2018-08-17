@@ -9,6 +9,7 @@
 import "phaser";
 import {Menu} from './game/Menu';
 import {FullGame} from './game/FullGame';
+import {GameOver} from './game/GameOver';
 
 
 const config: GameConfig = {
@@ -23,7 +24,7 @@ const config: GameConfig = {
             debug: false
         },
     },
-    scene: [ Menu, FullGame ]
+    scene: [ Menu, FullGame, GameOver ]
 };
 
 export class Game extends Phaser.Game {
