@@ -32,6 +32,17 @@
             display: block;
             margin-top: 40px;
         }
+
+        .mobileOnly{
+            display: none;
+        }
+
+        @media only screen and (max-device-width:480px) {
+            .mobileOnly { 
+                display: block; 
+            }
+        }
     </style>
+    <h1 class="mobileOnly">Looks like you're on a phone! Head over to a computer to play.</h1>
 </body>
 </html>
